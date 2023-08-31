@@ -7,7 +7,8 @@ I propose two methods of uncertainity quantification in classification tasks usi
 * A new approach for metrics calculations, see `BNN_posterior_extended()` 
 * Important bug fixes for sampling importance points
 * A second variance reduction method : simulated annealing
-* A results visualisation module, see `results`
+* Add options for resampling (local, global, both, no resampling)
+* A results visualisation module, see `results.py`
 
 
 
