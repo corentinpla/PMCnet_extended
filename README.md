@@ -1,5 +1,5 @@
 # PMCnet_extended
-I propose two methods of uncertainity quantification...
+I propose two methods of uncertainity quantification in classification tasks...
 * The first is based on [2]. It decomposes the BNN output variation in an epistemic and in an aleatoric one.
 * The second is based on [3]. It calculates uncertainty using a nearest-neighbor approach.
 
