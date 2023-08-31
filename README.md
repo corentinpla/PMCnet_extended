@@ -5,9 +5,13 @@ I propose two methods of uncertainity quantification in classification tasks usi
 
 ...as well as some improvements of PMCnet, the code implemented from this paper [1]. 
 * A new approach for metrics calculations, see `BNN_posterior_extended()` 
-* Important bug fixes for sampling importance points
+* Bug fixes for sampling importance points
 * A second variance reduction method : simulated annealing
-* Add options for resampling (local, global, both, no resampling)
+* Add options for resampling
+  * local `lr=1`
+  * global `lr=0`
+  * both `lr=2`
+  * no resampling `lr=-1`
 * A results visualisation module, see `results.py`
 
 
