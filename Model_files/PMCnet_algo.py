@@ -93,17 +93,12 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
         # 2. Weighting
         logf_np = np.array(logf)
         logf_np =logf_np-np.max(logf_np)
-        #print("logP before",logP)
         logP=logP-np.min(logP[logP>1])
         logP=np.where(logP<0,epsilon1,logP)
 
         
         w = np.exp(logf_np-logP,dtype=np.float64)+epsilon1
         w = np.nan_to_num(w) 
-        #print("logf_np",logf_np)
-        #print("logP", logP)
-
-
 
         if np.sum(w) == 0:
             wn = 1/len(w)*np.ones(len(w))
