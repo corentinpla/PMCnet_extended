@@ -394,25 +394,11 @@ def BNN_posterior_extended(N, K,population, weights, x_test, y_test1, tp):
     L =tp['L']
     weights = np.nan_to_num(weights)
     wn = weights/sum(weights)
-    #print("weights",wn)
-
     z_particle_test_all = []
     z_particle_test_all1 = []
-    resampled_particle = []
-    auc_test_particle_all = []
-    fpr_test_particle_all = []
-    tpr_test_particle_all = []
-    aucAv_test_particle_all = []
-    
-    matrix_test_particle_all = []
-    Precision_particle_all = []
-    Recall_particle_all = []
-    Specificity_particle_all = []
-    Accuracy_particle_all = []
-    F1_particle_all = []
     for jj in range(N*K):
         #look at the obtained weights
-        particle = population[:,jj] #est ce qu'il prend bien les 100 derniers ? 
+        particle = population[:,jj] 
         [W_particle,b_particle] = Vec2param(particle,tp)
 
         z_particle_test = FFnetwork(W_particle,b_particle,L,x_test,tp['activation'])
@@ -420,39 +406,11 @@ def BNN_posterior_extended(N, K,population, weights, x_test, y_test1, tp):
 
         z_particle_test1 = z_particle_test.detach().cpu().numpy() #transform it into numpy array
         z_particle_test_all1.append(m(torch.tensor(z_particle_test1))) 
-        #this is useful to display probabilistic ROC curves
-
-        auc_test_particle,fpr_test_particle, tpr_test_particle=fastAUC(y_test1,m(torch.tensor(z_particle_test1)))
-        auc_test_particle_all.append(auc_test_particle)
-        fpr_test_particle_all.append(fpr_test_particle)
-        tpr_test_particle_all.append(tpr_test_particle)
-
-        
-        z_est_test_particle = (m(z_particle_test)>0.5)*1.0
-        matrix_test_particle=confusion_matrix(np.array(y_test1),np.array(z_est_test_particle.cpu()))
-        matrix_test_particle_all.append(matrix_test_particle)
-
-        TP = matrix_test_particle[0,0]
-        FN = matrix_test_particle[0,1]
-        FP = matrix_test_particle[1,0]
-        TN = matrix_test_particle[1,1]
-
-        Precision_particle = TP/(TP+FP)
-        Recall_particle  = TP/(TP+FN)
-        Specificity_particle  = TN/(TN+FP)
-        Accuracy_particle  = (TP+TN)/(TP+TN+FP+FN)
-        F1_particle  = 2*TP/(2*TP+FP+FN)
-
-        Precision_particle_all.append(Precision_particle)
-        Recall_particle_all.append(Recall_particle)
-        Specificity_particle_all.append(Specificity_particle)
-        Accuracy_particle_all.append(Accuracy_particle)
-        F1_particle_all.append(F1_particle)
     
     #metrics after EV computation
     expected_value=wn[0]*z_particle_test_all1[0]
 
-    for k in range (1,100):
+    for k in range (1,N*K):
         expected_value=expected_value+wn[k]*z_particle_test_all1[k]
 
     auc_test_EV,fpr_test_EV, tpr_test_EV=fastAUC(y_test1,expected_value)
@@ -486,83 +444,43 @@ def BNN_posterior_extended(N, K,population, weights, x_test, y_test1, tp):
     metrics_EV["specificity"]=Specificity_EV
     metrics_EV["accuracy"]=Accuracy_EV
     metrics_EV["F1"]=F1_EV
+    metrics_EV["matrix"]=matrix_EV
 
 
-    return  z_particle_test_all, z_particle_test_all1, auc_test_particle_all, fpr_test_particle_all, tpr_test_particle_all, aucAv_test_particle_all, matrix_test_particle_all, Precision_particle_all, Recall_particle_all, Specificity_particle_all,Accuracy_particle_all, F1_particle_all,expected_value,metrics_EV
+    return  z_particle_test_all, z_particle_test_all1, expected_value,metrics_EV
 
 def BNN_posterior_multiclass_extended(N, K,population, weights, x_test, y_test1, tp):
     L =tp['L']
     weights[weights != weights] = 0 
     weights = np.nan_to_num(weights)
     wn = weights/sum(weights)
-    #print("weights",wn)
 
-    positions = [i for i in range(N*K)]
 
     z_particle_test_all = []
     z_particle_test_all1 = []
-    resampled_particle = []
-    auc_test_particle_all = []
-    fpr_test_particle_all = []
-    tpr_test_particle_all = []
-    aucAv_test_particle_all = []
-    
-    matrix_test_particle_all = []
-    Precision_particle_all = []
-    Recall_particle_all = []
-    Specificity_particle_all = []
-    Accuracy_particle_all = []
-    F1_particle_all = []
     for jj in range(N*K):
-        #look at the obtained weights
-        resampled_particle.append(population[:,positions[jj]])
-        [W_particle,b_particle] = Vec2param(resampled_particle[jj],tp)
+        particle = population[:,jj] 
+        
+        [W_particle,b_particle] = Vec2param(particle,tp)
 
         z_particle_test = FFnetwork(W_particle,b_particle,L,x_test,tp['activation'])
         
         z_particle_test = F.softmax(z_particle_test, dim=1).data.cpu() # probs
         z_particle_test1 = z_particle_test.data.max(dim=1, keepdim=False)[1] # labels
         
-        #print("prediction",type(z_particle_test),z_particle_test.shape)
-        #print("ground truth", type(F.one_hot(torch.tensor(y_test1)).cpu().numpy()),F.one_hot(torch.tensor(y_test1)).cpu().numpy().shape)
-        
         z_particle_test_all.append(z_particle_test) 
         z_particle_test_all1.append(z_particle_test1) 
-        #this is useful to display probabilistic ROC curves
-
-        auc_test_particle,fpr_test_particle, tpr_test_particle, aucAv_test_particle=Mul_AUC(F.one_hot(torch.tensor(y_test1)).cpu().numpy(),z_particle_test)
-        
-        auc_test_particle_all.append(auc_test_particle)
-        fpr_test_particle_all.append(fpr_test_particle)
-        tpr_test_particle_all.append(tpr_test_particle)
-        #print("auc_test_particle",auc_test_particle)
-        aucAv_test_particle_all.append(aucAv_test_particle) 
-        
-        matrix_test_particle=confusion_matrix(np.array(y_test1),z_particle_test1)
-        matrix_test_particle_all.append(matrix_test_particle)
-        
-        Accuracy_particle = np.sum(matrix_test_particle.diagonal())/np.sum(matrix_test_particle)
-        #print("Accuracy_particle",Accuracy_particle)
-        Accuracy_particle_all.append(Accuracy_particle)
     
     #metrics after EV computation
-
     expected_value=wn[0]*z_particle_test_all[0]
 
-    for k in range (1,100):
+    for k in range (1,N*K):
         expected_value=expected_value+wn[k]*z_particle_test_all[k]
     
     predicted_labels = expected_value.data.max(dim=1, keepdim=False)[1] # labels
-
     auc_test_particle,fpr_test_particle, tpr_test_particle, aucAv_test_particle=Mul_AUC(F.one_hot(torch.tensor(y_test1)).cpu().numpy(),expected_value)
-        
-
-    
     matrix_test_particle=confusion_matrix(np.array(y_test1),predicted_labels)
-
-    
     Accuracy_particle = np.sum(matrix_test_particle.diagonal())/np.sum(matrix_test_particle)
-
 
     metrics_EV={}
     metrics_EV["AUC"]=auc_test_particle
@@ -572,30 +490,21 @@ def BNN_posterior_multiclass_extended(N, K,population, weights, x_test, y_test1,
     metrics_EV["matrix"]=matrix_test_particle
     metrics_EV["accuracy"]=Accuracy_particle
             
-    return  z_particle_test_all, z_particle_test_all1, resampled_particle, auc_test_particle_all, fpr_test_particle_all, tpr_test_particle_all, aucAv_test_particle_all, matrix_test_particle_all, Precision_particle_all, Recall_particle_all, Specificity_particle_all,Accuracy_particle_all, F1_particle_all,expected_value,metrics_EV 
+    return  z_particle_test_all, z_particle_test_all1,expected_value,metrics_EV 
 
 def BNN_posterior_regression_extended(N, K,population,weights, x_test, y_test, tp):
     L =tp['L']
     weights = np.nan_to_num(weights)
     wn = weights/sum(weights)
     
-    positions = [i for i in range(N*K)]
-
     z_particle_test_all = []
-    resampled_particle = []
-    MSE_test_particle_all = []
     for jj in range(N*K):
         #look at the obtained weights
-        resampled_particle.append(population[:,positions[jj]])
-        [W_particle,b_particle] = Vec2param(resampled_particle[jj],tp)
+        particle = population[:,jj] 
+        [W_particle,b_particle] = Vec2param(particle,tp)
 
         z_particle_test = FFnetwork(W_particle,b_particle,L,x_test,tp['activation'])
         z_particle_test_all.append(z_particle_test) 
-        
-        loss_ = nn.MSELoss(reduction='mean')
-        loss = loss_(z_particle_test,y_test.cuda()).detach().cpu().numpy()
-        
-        MSE_test_particle_all.append(loss)
 
     #metrics after EV computation
     expected_value=wn[0]*z_particle_test_all[0]
@@ -604,9 +513,9 @@ def BNN_posterior_regression_extended(N, K,population,weights, x_test, y_test, t
         expected_value=expected_value+wn[k]*z_particle_test_all[k]
     
     loss_ = nn.MSELoss(reduction='mean')
-    EV_loss = loss_(expected_value,y_test.cuda()).detach().cpu().numpy()
+    EV_MSE = loss_(expected_value,y_test.cuda()).detach().cpu().numpy()
             
-    return  z_particle_test_all, resampled_particle, MSE_test_particle_all,EV_loss, expected_value
+    return  z_particle_test_all,EV_MSE, expected_value
 
 
 
