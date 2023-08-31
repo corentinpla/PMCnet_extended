@@ -447,7 +447,7 @@ def BNN_posterior_extended(N, K,population, weights, x_test, y_test1, tp):
     metrics_EV["matrix"]=matrix_EV
 
 
-    return  z_particle_test_all, z_particle_test_all1, expected_value,metrics_EV
+    return  z_particle_test_all, z_particle_test_all1, wn,expected_value,metrics_EV
 
 def BNN_posterior_multiclass_extended(N, K,population, weights, x_test, y_test1, tp):
     L =tp['L']
@@ -490,7 +490,7 @@ def BNN_posterior_multiclass_extended(N, K,population, weights, x_test, y_test1,
     metrics_EV["matrix"]=matrix_test_particle
     metrics_EV["accuracy"]=Accuracy_particle
             
-    return  z_particle_test_all, z_particle_test_all1,expected_value,metrics_EV 
+    return  z_particle_test_all, z_particle_test_all1,wn,expected_value,metrics_EV 
 
 def BNN_posterior_regression_extended(N, K,population,weights, x_test, y_test, tp):
     L =tp['L']
@@ -515,7 +515,7 @@ def BNN_posterior_regression_extended(N, K,population,weights, x_test, y_test, t
     loss_ = nn.MSELoss(reduction='mean')
     EV_MSE = loss_(expected_value,y_test.cuda()).detach().cpu().numpy()
             
-    return  z_particle_test_all,EV_MSE, expected_value
+    return  z_particle_test_all,wn,EV_MSE, expected_value
 
 
 
