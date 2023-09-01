@@ -12,28 +12,41 @@ with open ("/workspace/code/results/Glass/output_posterior_val_autoMPG_l2.txt","
 
 def get_mixture(output_posterior_val):
     # Create a Gaussian Mixture Model with 3 components
-    n_components = 100
-    gmm = GaussianMixture(n_components=n_components,covariance_type="tied", random_state=42)
+    n_components = 10
+    n_samples = 5000
 
-    # Generate sample data from the GMM
-    n_samples = 300
-    X = np.concatenate([np.random.normal(loc=i, scale=0.5, size=n_samples // n_components) for i in range(n_components)])
+    #compute the 10 bests weights
+    wn=output_posterior_val[-1][1]
+    best_indices_wn=np.argsort(wn)[::-1]
+    best_indices_wn=best_indices_wn[:10]
 
-    # Fit the GMM to the data
-    gmm.fit(X.reshape(-1, 1))
+    #output of the neural net associated with the 10 bests weights 
+    
+
+    weights=[wn[best_indices_wn[k]] for k in range(n_components)]
+    means=[]
+    stds=[0.1]*10
+
+    
+    # Generate random samples from the Gaussian Mixture Model
+    samples = []
+    for i in range(n_components):
+        component_samples = np.random.normal(loc=means[i], scale=stds[i], size=int(n_samples * weights[i]))
+        samples.extend(component_samples)
 
     # Plot the histogram of the generated data
-    plt.hist(X, bins=30, density=True, alpha=0.5, color='blue', label='Histogram')
+    plt.hist(samples, bins=30, density=True, alpha=0.5, color='blue', label='Histogram')
 
-    # Plot the individual Gaussian components
+    # Plot the individual Gaussian components with weights
     for i in range(n_components):
-        mean = gmm.means_[i][0]
-        std = np.sqrt(gmm.covariances_[i][0][0])
-        plt.plot(np.linspace(min(X), max(X), 100), norm.pdf(np.linspace(min(X), max(X), 100), mean, std),
-                color='red', linewidth=2, label=f'Component {i+1}')
+        weight = weights[i]
+        mean = means[i]
+        std = stds[i]
+        plt.plot(np.linspace(min(samples), max(samples), 100), weight * norm.pdf(np.linspace(min(samples), max(samples), 100), mean, std),
+                color='red', linewidth=2, label=f'Component {i+1} (Weight {weight:.2f})')
 
-    plt.title('1D Gaussian Mixture Model')
+    plt.title('Generated Gaussian Mixture Model')
     plt.xlabel('Value')
     plt.ylabel('Density')
     plt.legend()
-plt.show()
+    plt.show()
