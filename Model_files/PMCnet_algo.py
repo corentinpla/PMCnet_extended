@@ -76,7 +76,6 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
                 all_samples_0 = torch.cat((all_samples_0,a),1)      
         all_samples[t] = all_samples_0
         temp = evaluate_proposal_multiple_fullCov(all_samples[t], all_proposals[t], all_Sigma[t], N) 
-        #print("temp",temp)
         fp_mixt=np.array(temp.cpu(), dtype=np.float64)
         logP = np.log(fp_mixt+epsilon1)
         logP=np.where(logP < 0, epsilon1, logP) #keep only positive logP values
@@ -178,16 +177,7 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
             norm_weights = weights_nn/np.sum(weights_nn)
             W_bessel_n = 1 - np.sum(norm_weights**2)
             sample_mean_nn = torch.sum(torch.tensor(norm_weights).cuda().reshape(1,len(norm_weights)).repeat(M, 1)*samples_nn,1)
-            #sample_Cov_nn = weightedcov(torch.transpose(samples_nn,0,1).double(),norm_weights) # is the sample covariance approximated # it's a symmetric matrix
-            
-            #print("shape", samples_nn.shape)
-            #print("weights",norm_weights)
-            #print("samples",samples_nn.shape)
             sample_Cov_nn=weightedcov(torch.transpose(samples_nn,0,1).double(),norm_weights)
-            #print(sample_Cov_nn)
-            # print("is symetric",np.allclose(sample_Cov_nn, sample_Cov_nn.T))
-            # print("det",np.linalg.det(sample_Cov_nn))
-            #print("valeurs propres",np.linalg.eigvals(sample_Cov_nn))
             sample_Cov_0.append(sample_Cov_nn)
             norm_weights_cropped = crop_weights(norm_weights,fraction)
             sample_Cov_nn_cropped = weightedcov(torch.transpose(samples_nn,0,1).double(),norm_weights_cropped)#  sample_Cov_nn_cropped is (a possibly biased) stable estimator of the covariance matrix
@@ -206,9 +196,6 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
                 rob_Cov_1_0.append(sample_Cov_nn)
 
                 rob_Cov_2_0.append((1-eta[t])*sample_Cov_nn + eta[t]*sample_Cov_nn_cropped)
-                print(rob_Cov_1_0[-1])
-                print("det cov 1",np.linalg.det(rob_Cov_1_0[-1].cpu().numpy()))
-                print("det cov 2",np.linalg.det(rob_Cov_2_0[-1].cpu().numpy()))
             else :
                 parent_index_new = parents_samples_resampled[t][n]
 
@@ -235,21 +222,14 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
                 A_n=rob_Cov_1[t][n]
             elif cov_type==2 :    
                 A_n=rob_Cov_2[t][n]   
-            #print(sqrtm(A_n.cpu().numpy())) 
             try:
-                #print(A_n)
-                #print("det", np.linalg.det(A_n.cpu().numpy()))
-                #print("shape",A_n.cpu().numpy().shape)
                 ff = multivariate_normal(np.zeros((M)),A_n.cpu().numpy()).pdf(np.zeros((M)))
                 flag_A = 1
-                #print("flag_A_1",flag_A)
             except:
                 flag_A = 0
-                #print("flag_A_2",flag_A)
             if flag_A == 1:
                 if (np.isreal(sqrtm(A_n.cpu().numpy()))).all() == False:
                     flag_A = 0
-            #print("flag_A_3",flag_A)
             if flag_A == 0:
                 ct = ct+1
                 if t == 0:
