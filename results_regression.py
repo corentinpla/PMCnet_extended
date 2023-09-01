@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from sklearn.mixture import GaussianMixture
 import pickle 
+from PIL import Image
 
 with open ("/workspace/code/results/autoMPG/output_autoMPG_l2_final.txt","rb") as output: 
     output_PMC=pickle.load(output)
@@ -10,25 +11,20 @@ with open ("/workspace/code/results/autoMPG/output_autoMPG_l2_final.txt","rb") a
 with open ("/workspace/code/results/autoMPG/output_psoterior_val_autoMPG_l2_final.txt","rb") as output:
     output_posterior_val=pickle.load(output)
 
-def get_mixture(output_posterior_val,test_sample):
+def get_mixture(output_posterior_val,iteration,test_sample):
     # Create a Gaussian Mixture Model with 3 components
     n_components = 10
     n_samples = 5000
 
     #compute the 10 bests weights
-    wn=output_posterior_val[-1][1]  #last itération 
+    wn=output_posterior_val[iteration][1]  #last itération 
     best_indices_wn=np.argsort(wn)[::-1]
     best_indices_wn=best_indices_wn[:10]
 
     #output of the neural net associated with the 10 bests weights 
-    output=output_posterior_val[-1][0][test_sample]
-    print(len(output_posterior_val[-1]))
-    print(len(output_posterior_val[-1][0]))
-    print(len(output_posterior_val[-1][0][-1]))
-
 
     weights=[wn[best_indices_wn[k]] for k in range(n_components)]
-    means=[output_posterior_val[-1][0][best_indices_wn[k]][test_sample] for k in range(n_components)]
+    means=[output_posterior_val[iteration][0][best_indices_wn[k]][test_sample] for k in range(n_components)]
     stds=[0.1]*10
 
     
@@ -53,6 +49,25 @@ def get_mixture(output_posterior_val,test_sample):
     plt.xlabel('Value')
     plt.ylabel('Density')
     plt.legend()
-    plt.savefig("/workspace/code/results/figures/mixture.png")
+    plt.savefig("/workspace/code/results/figures/mixture"+str(iteration)+".png")
 
-get_mixture(output_posterior_val,1)
+
+def get_gif (L): #L: list of figures as returned by simulation_gif
+    frames=[]
+    for image_path in L:
+        img = Image.open(image_path)
+        frames.append(img)
+
+    # Specify the output GIF file name
+    output_gif = '/workspace/code/results/gif.gif'
+
+    # Save the GIF using the save method with duration between frames (in milliseconds)
+    frames[0].save(output_gif, save_all=True, append_images=frames[1:], duration=100, loop=0)
+
+L=[]
+for iteration in range(30):
+    get_mixture(output_posterior_val,iteration,1)
+    L.append("/workspace/code/results/figures/mixture"+str(iteration)+".png")
+
+get_gif(L)
+

@@ -178,7 +178,7 @@ else:
 logger = get_logger('log_BNN_autoMPG_l2.txt') 
 
 if dogolden_search == 0:    
-    T = 5
+    T = 30
     N_resampled = 100
     is_binary = 0
     loss = 'MSE'
@@ -277,4 +277,4 @@ else:
         except Exception:
             traceback.print_exc(file=log)        
 
-    
+
