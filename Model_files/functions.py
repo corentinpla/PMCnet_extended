@@ -513,7 +513,7 @@ def BNN_posterior_regression_extended(N, K,population,weights, x_test, y_test, t
         expected_value=expected_value+wn[k]*z_particle_test_all[k]
     
     loss_ = nn.MSELoss(reduction='mean')
-    EV_MSE = loss_(expected_value,y_test.cuda()).detach().cpu().numpy()
+    EV_MSE = loss_(expected_value,torch.tensor(y_test).cuda()).detach().cpu().numpy()
             
     return  z_particle_test_all,wn,EV_MSE, expected_value
 

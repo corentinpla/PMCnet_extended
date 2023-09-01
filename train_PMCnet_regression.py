@@ -30,9 +30,9 @@ import traceback
 
 cuda2 = torch.device('cuda:0')
 
-folder_name_train = '/workspace/code/PMCnet_extended/PMCnet_extended/data/autoMPG/train_data.mat'
-folder_name_val = '/workspace/code/PMCnet_extended/PMCnet_extended/data/autoMPG/val_data.mat'
-folder_name_test = '/workspace/code/PMCnet_extended/PMCnet_extended/data/autoMPG/test_data.mat'
+folder_name_train = '/workspace/code/PMCnet_extended/data/autoMPG/train_data.mat'
+folder_name_val = '/workspace/code/PMCnet_extended/data/autoMPG/val_data.mat'
+folder_name_test = '/workspace/code/PMCnet_extended/data/autoMPG/test_data.mat'
 
 y_train = OpenMat(sio.loadmat(folder_name_train)['y_train'])
 x_train1 = OpenMat(sio.loadmat(folder_name_train)['x_train'])
@@ -121,20 +121,20 @@ tp['dimension'] = total_number
 tp['activation'] = ['ReLU','None']
 tp['classification'] = 'regression'
 
-dogolden_search = 1
+dogolden_search = 0
 dosave = 0
 extended=True 
 
 # some settings
 use_cuda = torch.cuda.is_available()
 lr = 1e-3
-results_dir = 'results/autoMPG'  
+results_dir = '/workspace/code/results/autoMPG'  
 os.makedirs(results_dir, exist_ok=True) 
 
 # initialize the parameters by the learnt model derived by MLE
 # load the parameters 
 
-folder_name_params = '/workspace/code/PMCnet_extended/PMCnet_extended/params/autoMPG'
+folder_name_params = '/workspace/code/PMCnet_extended/params/autoMPG'
 
 W1 = OpenMat(sio.loadmat(os.path.join(folder_name_params,'W1.mat'))['W1']).cuda()
 b1 = OpenMat(sio.loadmat(os.path.join(folder_name_params,'b1.mat'))['b1']).cuda()
@@ -178,7 +178,7 @@ else:
 logger = get_logger('log_BNN_autoMPG_l2.txt') 
 
 if dogolden_search == 0:    
-    T = 30
+    T = 5
     N_resampled = 100
     is_binary = 0
     loss = 'MSE'
@@ -218,7 +218,7 @@ if dogolden_search == 0:
                     population = all_samples_temp[k] # the last iteration
                     weights = all_weights_temp[k]
                     
-                    output_posterior_val = BNN_posterior_extended(N, K,population, weights, x_test, y_test1, tp)
+                    output_posterior_val = BNN_posterior_regression_extended(N, K,population, weights, x_test, y_test1, tp)
                     output_posterior_val_vec.append(output_posterior_val)
                 
                 path_save_BNN_output  = os.path.join(results_dir,'output_psoterior_val_autoMPG_l2_final.txt')   

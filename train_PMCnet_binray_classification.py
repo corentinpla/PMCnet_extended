@@ -31,9 +31,9 @@ import traceback
 
 cuda2 = torch.device('cuda:0')
 
-folder_name_train = '/workspace/code/PMCnet_bis/PMCnet/data/Ionosphere/train_data.mat'
-folder_name_val = '/workspace/code/PMCnet_bis/PMCnet/data/Ionosphere/val_data.mat'
-folder_name_test = '/workspace/code/PMCnet_bis/PMCnet/data/Ionosphere/test_data.mat'
+folder_name_train = '/workspace/code/PMCnet_extended/data/Ionosphere/train_data.mat'
+folder_name_val = '/workspace/code/PMCnet_extended/data/Ionosphere/val_data.mat'
+folder_name_test = '/workspace/code/PMCnet_extended/data/Ionosphere/test_data.mat'
 
 y_train = OpenMat(sio.loadmat(folder_name_train)['y_train'])
 x_train = OpenMat(sio.loadmat(folder_name_train)['x_train'])
@@ -133,7 +133,7 @@ os.makedirs(results_dir, exist_ok=True)
 # initialize the parameters by the learnt model derived by MLE
 # load the parameters 
 
-folder_name_params = '/workspace/code/PMCnet_bis/PMCnet/params/Ionosphere'
+folder_name_params = '/workspace/code/PMCnet_extended/params/Ionosphere'
 
 W1 = OpenMat(sio.loadmat(os.path.join(folder_name_params,'W1.mat'))['W1']).cuda()
 b1 = OpenMat(sio.loadmat(os.path.join(folder_name_params,'b1.mat'))['b1']).cuda()

@@ -16,15 +16,15 @@ def get_mixture(output_posterior_val):
     n_samples = 5000
 
     #compute the 10 bests weights
-    wn=output_posterior_val[-1][1]
+    wn=output_posterior_val[-1][1]  #last itération 
     best_indices_wn=np.argsort(wn)[::-1]
     best_indices_wn=best_indices_wn[:10]
 
     #output of the neural net associated with the 10 bests weights 
-    
+    output=output_posterior_val[-1][0]
 
     weights=[wn[best_indices_wn[k]] for k in range(n_components)]
-    means=[]
+    means=[output[best_indices_wn[k]] for k in range(n_components)]
     stds=[0.1]*10
 
     
@@ -35,7 +35,7 @@ def get_mixture(output_posterior_val):
         samples.extend(component_samples)
 
     # Plot the histogram of the generated data
-    plt.hist(samples, bins=30, density=True, alpha=0.5, color='blue', label='Histogram')
+    plt.hist(samples, bins=300, density=True, alpha=0.5, color='blue', label='Histogram')
 
     # Plot the individual Gaussian components with weights
     for i in range(n_components):
@@ -49,4 +49,6 @@ def get_mixture(output_posterior_val):
     plt.xlabel('Value')
     plt.ylabel('Density')
     plt.legend()
-    plt.show()
+    plt.savefig("/workspace/code/results/figures/mixture.py")
+
+get

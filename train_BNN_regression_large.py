@@ -28,13 +28,13 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import RandomOverSampler
 import traceback
 
-from src.Bayes_By_Backprop.model import *
+
 
 cuda2 = torch.device('cuda:0')
 
-folder_name_train = '/workspace/code/PMCnet_bis/PMCnet/data/Naval/train_data.mat'
-folder_name_val = '/workspace/code/PMCnet_bis/PMCnet/data/Naval/val_data.mat'
-folder_name_test = '/workspace/code/PMCnet_bis/PMCnet/data/Naval/test_data.mat'
+folder_name_train = '/workspace/code/PMCnet_extended/data/Naval/train_data.mat'
+folder_name_val = '/workspace/code/PMCnet_extended/data/Naval/val_data.mat'
+folder_name_test = '/workspace/code/PMCnet_extended/data/Naval/test_data.mat'
 
 y_train = OpenMat(sio.loadmat(folder_name_train)['y1_train'])
 x_train1 = OpenMat(sio.loadmat(folder_name_train)['x_train'])
