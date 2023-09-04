@@ -26,7 +26,7 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
     #parameters for the covariance adaptation
     steps = 1
     coef_step = 0.5
-    cov_type = 2
+    cov_type = 0
     beta0 = 0.5
     increase_beta = 0
     eta0 = 1
@@ -92,9 +92,10 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
         # 2. Weighting
         logf_np = np.array(logf)
         logf_np =logf_np-np.max(logf_np)
-        logP=logP-np.min(logP[logP>1])
+        #logP=logP-np.min(logP[logP>1])
         logP=np.where(logP<0,epsilon1,logP)
-
+        print("logf_np",logf_np)
+        print("logP",logP)
         
         w = np.exp(logf_np-logP,dtype=np.float64)+epsilon1
         w = np.nan_to_num(w) 
@@ -174,7 +175,7 @@ def SL_PMC_Adapt_Cov_new(N,K,T,sig_prop,lr,gr_period,tp,est_ml,epsilon1, epsilon
             ind_nn = [i for i in range((n)*K, (n+1)*K)]
             samples_nn = all_samples[t][:,ind_nn]
             weights_nn = all_weights_new[ind_nn]
-            norm_weights = weights_nn/np.sum(weights_nn)
+            norm_weights = weights_nn/np.sum(weights_nn+epsilon2)
             W_bessel_n = 1 - np.sum(norm_weights**2)
             sample_mean_nn = torch.sum(torch.tensor(norm_weights).cuda().reshape(1,len(norm_weights)).repeat(M, 1)*samples_nn,1)
             sample_Cov_nn=weightedcov(torch.transpose(samples_nn,0,1).double(),norm_weights)

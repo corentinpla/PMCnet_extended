@@ -17,7 +17,7 @@ def get_mixture(output_posterior_val,iteration,test_sample):
     n_samples = 5000
 
     #compute the 10 bests weights
-    wn=output_posterior_val[iteration][1]  #last itération 
+    wn=output_posterior_val[iteration][1]  
     best_indices_wn=np.argsort(wn)[::-1]
     best_indices_wn=best_indices_wn[:10]
 
@@ -38,6 +38,8 @@ def get_mixture(output_posterior_val,iteration,test_sample):
     plt.hist(samples, bins=300, density=True, alpha=0.5, color='blue', label='Histogram')
 
     # Plot the individual Gaussian components with weights
+    common_xlim=(14,18)
+    common_ylim=(0,10)
     for i in range(n_components):
         weight = weights[i]
         mean = means[i]
@@ -45,12 +47,14 @@ def get_mixture(output_posterior_val,iteration,test_sample):
         plt.plot(np.linspace(min(samples), max(samples), 100), weight * norm.pdf(np.linspace(min(samples), max(samples), 100), mean.cpu().detach().numpy(), std),
                 color='red', linewidth=2, label=f'Component {i+1} (Weight {weight:.2f})')
 
-    plt.title('Generated Gaussian Mixture Model')
+    plt.title('Generated Gaussian Mixture Model, iteration '+str(iteration))
     plt.xlabel('Value')
     plt.ylabel('Density')
+    plt.xlim(common_xlim)
+    plt.ylim(common_ylim)
     plt.legend()
     plt.savefig("/workspace/code/results/figures/mixture"+str(iteration)+".png")
-
+    plt.close()
 
 def get_gif (L): #L: list of figures as returned by simulation_gif
     frames=[]
@@ -65,7 +69,7 @@ def get_gif (L): #L: list of figures as returned by simulation_gif
     frames[0].save(output_gif, save_all=True, append_images=frames[1:], duration=100, loop=0)
 
 L=[]
-for iteration in range(30):
+for iteration in range(100):
     get_mixture(output_posterior_val,iteration,1)
     L.append("/workspace/code/results/figures/mixture"+str(iteration)+".png")
 

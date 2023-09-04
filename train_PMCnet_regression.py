@@ -151,8 +151,8 @@ if hidden_layer1 != 0:
 
 #parameters for our algorithm
 p=time.time()
-N = 10 # number of proposals
-K = 10  # samples per proposal per iteration
+N = 50 # number of proposals
+K = 200  # samples per proposal per iteration
 sig_prop = 0.01
 lr = 2  #glocal resampling
 gr_period=5
@@ -178,7 +178,7 @@ else:
 logger = get_logger('log_BNN_autoMPG_l2.txt') 
 
 if dogolden_search == 0:    
-    T = 30
+    T = 100
     N_resampled = 100
     is_binary = 0
     loss = 'MSE'
